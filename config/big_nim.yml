@@ -1,0 +1,17 @@
+game:
+  # ["Nim"|"Ledge"]: Game to play
+  type: "Nim"
+  # [1|2|3]: Starting player, 3 -> starting player randomly assigned.
+  player_starting: 1
+
+# Game specific parameters
+  # Nim-specific parameters, only used when type: "Nim"
+  stones: 100
+  max_move: 13
+
+  # Ledge-specific parameters, only used when type: "Ledge"
+  length: 80
+  copper_coins: 7
+
+mcts:
+  M: 500
