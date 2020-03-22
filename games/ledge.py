@@ -3,11 +3,13 @@ from typing import List
 
 import numpy as np
 
-from game import Game
+from game import Game, State
+
 
 # rules: a player may
 # a. pick up the coin currently sitting on the ledge
 # b. move a coin from its current location to another location to the left
+
 
 class Ledge(Game):
 
@@ -43,19 +45,18 @@ class Ledge(Game):
             self.board = board
 
         self._completed = False
+        self._last_state = np.copy(self.board)
 
     # ================= PROPERTIES =================
-
-    @property
-    def state_key(self) -> bytes:
-        return self.board.tobytes()
-        pass
 
     @property
     def completed(self) -> bool:
         return self._completed
 
     # ================= METHODS =================
+
+    def get_state(self) -> State:
+        return State(self.board, lambda s: s.tobytes())
 
     def allowed_moves(self) -> List:
         movable_indices = [i for i in range(len(self.board)) if self.board[i] != 0]
@@ -72,30 +73,25 @@ class Ledge(Game):
                 moves.append((movable_indices[q], p))
         return moves
 
-    def _get_state_after_move(self, move) -> (np.ndarray, bool):
-        board = np.copy(self.board)
-        done = False
-        if move == 0:
-            if board[0] == 2:
-                done = True
-            board[0] = 0
-        else:
-            board[move[1]], board[move[0]] = board[move[0]], board[move[1]]
-
-        return board, done
-
     def apply_move(self, move) -> None:
-        self.board, self._completed = self._get_state_after_move(move)
+        self._last_state = np.copy(self.board)
+        # Apply the move
+        if move == 0:
+            if self.board[0] == 2:
+                self._completed = True
+            self.board[0] = 0
+        else:
+            self.board[move[1]], self.board[move[0]] = self.board[move[0]], self.board[move[1]]
+        # End turn, next player's turn
         self._swap_player()
 
-
     def print_move(self, move) -> None:
-        action = f"Popping ledge: {'gold' if self.board[0] == 2 else 'copper'} coin"
+        action = f"Popping ledge: {'gold' if self._last_state[0] == 2 else 'copper'} coin"
         if type(move) is tuple:
-            action = f"Moving {'gold' if self.board[move[0]] == 2 else 'copper'} coin from {move[0]} to {move[1]}"
+            action = f"Moving {'gold' if self._last_state[move[0]] == 2 else 'copper'} coin from {move[0]} to {move[1]}"
 
         print(f"Player {'1' if self._player1s_turn else '2'}:\n"
-              f"{action}, resulting in board state:\n{self._get_state_after_move(move)[0]}\n")
+              f"{action}, resulting in board state:\n{self.board}\n")
 
     def __repr__(self):
         return f"{self.board}"

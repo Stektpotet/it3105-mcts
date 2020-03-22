@@ -4,6 +4,22 @@ from typing import List
 
 import numpy as np
 
+class State:
+    """
+    A functor wrapper of a state including its ability to convert itself to a key
+    """
+    @property
+    def key(self):
+        return self._bytes_conversion(self._state)
+
+    @property
+    def value(self):
+        return self._state
+
+    def __init__(self, state, bytes_conversion):
+        self._state = state
+        self._bytes_conversion = bytes_conversion
+
 
 class Game(ABC):
 
@@ -35,12 +51,11 @@ class Game(ABC):
     def completed(self) -> bool:
         pass
 
-    @property
-    @abstractmethod
-    def state_key(self) -> bytes:
-        pass
-
     # ================= METHODS =================
+
+    @abstractmethod
+    def get_state(self) -> State:
+        pass
 
     @abstractmethod
     def allowed_moves(self) -> List:
@@ -51,12 +66,13 @@ class Game(ABC):
         pass
 
     @abstractmethod
-    def _get_state_after_move(self, move) -> (np.ndarray, bool):
-        pass
-
-
-    @abstractmethod
     def print_move(self, move) -> None:
+        """
+        Print a move right after it's been applied to
+        show it's effect on the game
+        :param move: the move that was made
+        :return: None
+        """
         pass
 
     def _swap_player(self) -> None:

@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 from abc import abstractmethod
-from game import Game
+from game import Game, State
 
 
 # https://en.wikipedia.org/wiki/Nim
@@ -20,6 +20,8 @@ from game import Game
 
 # THE SYSTEM SHOULD BE ABLE TO PLAY WITH ANY VALUE FOR N & K, WHERE 1 < K < N < 100
 
+
+
 class Nim(Game):
 
     def __init__(self, player_starting: int, stones: int, max_move: int, min_move: int = 1):
@@ -32,12 +34,9 @@ class Nim(Game):
         self._max = max_move
         self._min = min_move
         self._starting_allowed_moves = list(np.arange(1, self._max_move + 1))
+        self._last_state = self._stones
 
     # ================= PROPERTIES =================
-
-    @property
-    def state_key(self) -> bytes:
-        return bytes(self._stones)
 
     @property
     def completed(self) -> bool:
@@ -65,6 +64,9 @@ class Nim(Game):
 
     # ================= METHODS =================
 
+    def get_state(self) -> State:
+        return State(self._stones, lambda s: s.to_bytes(4, byteorder="big"))
+
     def allowed_moves(self) -> List:
         """
         Get all the allowed moves at this point
@@ -75,23 +77,19 @@ class Nim(Game):
             return list(np.arange(1, self._max_move + 1))
         return self._starting_allowed_moves
 
-    def _get_state_after_move(self, move) -> (np.ndarray, bool):
+    def apply_move(self, move: int) -> None:
+        self._last_state = self._stones
+        # Apply the move
         if move < self._min or move > self._max_move:
             exit(f"Illegal move performed! tried to remove {move}, "
                  f"when the constraints were ({self._min} <= {move} <= {self._max_move})!")
-        stones = self._stones
-        stones -= move
-        return stones, stones == 0
-
-    def apply_move(self, move: int) -> None:
-        self._stones = self._get_state_after_move(move)[0]
-        # TODO: NOTE THIS WILL ACTUALLY SWITCH AWAY FROM THE PLAYER EVEN WHEN HE WON!
-        #       Change logic to consider winning player to 'not self._player1s_turn'
+        self._stones -= move
+        # End turn, next player's turn
         self._swap_player()
 
     def print_move(self, move) -> None:
         print(f"{'Player 1' if self._player1s_turn else 'Player 2'}:\n"
-              f"taking {move} of {self._stones} stones, {self._stones - move} stones remain...\n")
+              f"taking {move} of {self._last_state} stones, {self._stones} stones remain...\n")
 
     def __repr__(self):
         return f"Stones left: {self._stones}\nselection range: {self._min} - {self._max_move}"

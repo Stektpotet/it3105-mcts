@@ -6,7 +6,7 @@ game:
 
 # Game specific parameters
   # Nim-specific parameters, only used when type: "Nim"
-  stones: 10      # N
+  stones: 100     # N
   max_move: 7     # K
 
   # Ledge-specific parameters, only used when type: "Ledge"

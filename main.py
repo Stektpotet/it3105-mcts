@@ -50,8 +50,8 @@ if __name__ == '__main__':
     while not game.completed:
         moves = game.allowed_moves()
         move = random.choice(moves)  # TODO: AI
+        game.apply_move(move)
         if args.verbose:
             game.print_move(move)
-        game.apply_move(move)
 
     print(f"Player {'1'if game.did_player1_win() else '2'} wins!")
