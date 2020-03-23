@@ -9,15 +9,21 @@ class State:
     A functor wrapper of a state including its ability to convert itself to a key
     """
     @property
-    def key(self):
-        return self._bytes_conversion(self._state)
+    def key(self) -> (bool, bytes):
+        b = b'\x00'
+        try:
+            b = self._bytes_conversion(self._state)
+        except AttributeError as e:
+            print("AttrErr", self._state, type(self._state), self._player1)
+        return self._player1, b
 
     @property
     def value(self):
         return self._state
 
-    def __init__(self, state, bytes_conversion):
+    def __init__(self, state, player1: bool, bytes_conversion):
         self._state = state
+        self._player1 = player1
         self._bytes_conversion = bytes_conversion
 
 
@@ -47,6 +53,14 @@ class Game(ABC):
     # ================= PROPERTIES =================
 
     @property
+    def player1s_turn(self):
+        return self._player1s_turn
+
+    @property
+    def player1s_starts(self):
+        return self._player1_starts
+
+    @property
     @abstractmethod
     def completed(self) -> bool:
         pass
@@ -54,7 +68,7 @@ class Game(ABC):
     # ================= METHODS =================
 
     @abstractmethod
-    def get_state(self) -> State:
+    def get_state(self) -> (bool, bytes):
         pass
 
     @abstractmethod
@@ -79,12 +93,17 @@ class Game(ABC):
         self._player1s_turn = not self._player1s_turn
 
     def __init__(self, player_starting: int):
+        # TODO: this must be moved out of here, as 3 should assign randomly for each game in a batch
         if player_starting < 1 or player_starting > 2:
             self._player1s_turn = bool(random.getrandbits(1))
         else:
             self._player1s_turn = (player_starting == 1)
+        self._player1_starts = self._player1s_turn
 
-    def did_player1_win(self):
-        # player 1 wins if it's no longer his turn when the game completed,
-        # i.e. if player 1 was the last player to perform an action!
-        return self.completed and not self._player1s_turn
+    def starting_player_won(self):
+        if not self.completed:
+            print("Winning player-evaluation was done even though game wasn't done yet!")
+        # The starting player has won if they performed the last move.
+        # Hence (p1_starts && !p1s_turn) || (!p1_starts && p1s_turn)
+        # XOR for short: (p1_starts ^ p1s_turn)
+        return self._player1_starts ^ self.player1s_turn

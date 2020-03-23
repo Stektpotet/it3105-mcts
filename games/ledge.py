@@ -55,9 +55,10 @@ class Ledge(Game):
 
     # ================= METHODS =================
 
-    def get_state(self) -> State:
-        return State(self.board, lambda s: s.tobytes())
+    def get_state(self) -> (bool, bytes):
+        return self.player1s_turn, self.board.tobytes()
 
+    # NOTE: these could be cached till apply_move is called
     def allowed_moves(self) -> List:
         movable_indices = [i for i in range(len(self.board)) if self.board[i] != 0]
         moves = []
@@ -90,7 +91,8 @@ class Ledge(Game):
         if type(move) is tuple:
             action = f"Moving {'gold' if self._last_state[move[0]] == 2 else 'copper'} coin from {move[0]} to {move[1]}"
 
-        print(f"Player {'1' if self._player1s_turn else '2'}:\n"
+        # This is inverted because the player was just swapped
+        print(f"Player {'2' if self._player1s_turn else '1'}:\n"
               f"{action}, resulting in board state:\n{self.board}\n")
 
     def __repr__(self):

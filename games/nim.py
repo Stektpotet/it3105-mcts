@@ -30,7 +30,7 @@ class Nim(Game):
         if stones < 1:
             print(f"Too few, or negative amount of stones, clamping to 1!")
             stones = 1
-        self._stones = stones
+        self._stones = np.int32(stones)
         self._max = max_move
         self._min = min_move
         self._starting_allowed_moves = list(np.arange(1, self._max_move + 1))
@@ -64,8 +64,8 @@ class Nim(Game):
 
     # ================= METHODS =================
 
-    def get_state(self) -> State:
-        return State(self._stones, lambda s: s.to_bytes(4, byteorder="big"))
+    def get_state(self) -> (bool, bytes):
+        return self.player1s_turn, self._stones.item().to_bytes(4, byteorder="big")
 
     def allowed_moves(self) -> List:
         """
@@ -88,7 +88,8 @@ class Nim(Game):
         self._swap_player()
 
     def print_move(self, move) -> None:
-        print(f"{'Player 1' if self._player1s_turn else 'Player 2'}:\n"
+        # This is inverted because the player was just swapped
+        print(f"{'Player 2' if self._player1s_turn else 'Player 1'}:\n"
               f"taking {move} of {self._last_state} stones, {self._stones} stones remain...\n")
 
     def __repr__(self):
