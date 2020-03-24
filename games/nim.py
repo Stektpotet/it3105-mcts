@@ -1,8 +1,7 @@
 from typing import List
 
 import numpy as np
-from abc import abstractmethod
-from game import Game, State
+from game import Game
 
 
 # https://en.wikipedia.org/wiki/Nim

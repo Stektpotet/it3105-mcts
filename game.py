@@ -2,8 +2,6 @@ from abc import ABC, abstractmethod
 import random
 from typing import List
 
-import numpy as np
-
 class State:
     """
     A functor wrapper of a state including its ability to convert itself to a key
@@ -13,7 +11,7 @@ class State:
         b = b'\x00'
         try:
             b = self._bytes_conversion(self._state)
-        except AttributeError as e:
+        except AttributeError:
             print("AttrErr", self._state, type(self._state), self._player1)
         return self._player1, b
 
@@ -84,7 +82,6 @@ class Game(ABC):
     @abstractmethod
     def clone(self):
         pass
-
 
     @abstractmethod
     def allowed_moves(self) -> List:

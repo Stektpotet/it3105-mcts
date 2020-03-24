@@ -1,33 +1,37 @@
-import copy
 import math
-from typing import Dict, List
+from typing import List
 import random
 
 from game import Game
 
 class SearchTree:
     class Node:
+
+        @property
+        def action_keys(self) -> List:
+            return list(self._actions.keys())
+
         def __init__(self, player1: bool, allowed_moves: List):
             self._visits = 1  # upon creation, the node is being visited
             self._player1s_turn = player1
             # action utility
-            self.actions = {
+            self._actions = {
                 action: [0, 0]  # initialize action values
                 for action in allowed_moves
             }
-            self.previous_move = None
+            self._previous_move = None
 
         def update_values(self, player1_won: int):
             self._visits += 1
-            self.actions[self.previous_move][0] += 1
-            n, q = self.actions[self.previous_move]
-            self.actions[self.previous_move][1] += (player1_won - q) / n
+            self._actions[self._previous_move][0] += 1
+            n, q = self._actions[self._previous_move]
+            self._actions[self._previous_move][1] += (player1_won - q) / n
 
-        def set_last_action(self, action):
-            self.previous_move = action
+        def set_last_action(self, action) -> None:
+            self._previous_move = action
 
-        def action_value(self, move, c):
-            visits, q_value = self.actions[move]
+        def action_value(self, action, c: float) -> float:
+            visits, q_value = self._actions[action]
 
             # UCT exploration bonus
             exploration_bonus = c * math.sqrt(math.log(self._visits) / (visits + 1))
@@ -35,14 +39,6 @@ class SearchTree:
             if self._player1s_turn:
                 return q_value + exploration_bonus
             return q_value - exploration_bonus
-
-        def __repr__(self):
-            return f"Player {'1' if self._player1s_turn else '2'}:\n" \
-                   f"Visits: {self._visits},\n" \
-                   f"Visits: {self.actions},\n" \
-                   f"Previous: {self.previous_move}"
-
-    # _state_lookup: Dict[(bool, bytes), Node]
 
     def __init__(self, c=1):
         self._state_lookup = {}
@@ -63,9 +59,9 @@ class SearchTree:
     def rollout_policy(game: Game):
         return random.choice(game.allowed_moves())
 
-    def tree_policy(self, game: Game, c):
+    def tree_policy(self, game: Game, c: float):
         node = self.current_state_node(game)
-        all_actions = list(node.actions.keys())
+        all_actions = node.action_keys
 
         index = 0
         if game.player1s_turn:  # argmax
@@ -86,40 +82,39 @@ class SearchTree:
 
         return all_actions[index]
 
-    #TODO: def greedy: i.e. tree_policy where c = 0
-
-    def backprop(self, path, result: int):
+    @staticmethod
+    def backprop(path: List, result: int) -> None:
         for node in path:
             node.update_values(result)
 
 
 class MonteCarloTreeSearch:
-    def __init__(self, c=1):
+    def __init__(self, c: float = 1):
         self.tree = SearchTree()
-        self.c_init = c
+        # self.c_init = c
         self.c = c
 
-    def clear_tree(self):
+    def clear(self) -> None:
         self.tree.clear()
-        self.c = self.c_init
+        # self.c = self.c_init
 
     def search(self, game: Game, simulations: int):
         # Perform a series of simulations to find the best action to perform
         # (by updating the policy throughout all the simulations)
         sim_games = [game.clone() for _ in range(simulations)]
-        for i,g in enumerate(sim_games):
-            self.simulate(g)
+        for g in sim_games:
+            self._simulate(g)
         # Apply the policy onto the game in a greedy/exploitive manner
         return self.tree.tree_policy(game, 0)
 
-    def simulate(self, game: Game):
+    def _simulate(self, game: Game) -> None:
         # game = base_game.clone()  # Make a copy of the game to perform simulations on
 
         # 1 From the root state (R) use the tree policy to choose the next pre-existing child node.
-        traversed_nodes = self.traverse_tree(game)
+        traversed_nodes = self._traverse_tree(game)
 
         # Perform a rollout from a leaf node
-        player1_won = self.rollout(game)  # rollout
+        player1_won = self._rollout(game)  # rollout
 
         # 4 Propagate information about F (such as the winner), along
         # the entire path from F back to S and then back to R. That
@@ -128,7 +123,7 @@ class MonteCarloTreeSearch:
 
     # Traverse tree
 
-    def traverse_tree(self, game: Game):
+    def _traverse_tree(self, game: Game) -> List:
         path = []  # list of nodes traversed
         while not game.completed:
             current_node = self.tree.current_state_node(game)
@@ -140,7 +135,7 @@ class MonteCarloTreeSearch:
             game.apply_move(action)
         return path
 
-    def rollout(self, game: Game):
+    def _rollout(self, game: Game) -> int:
         while not game.completed:
             move = self.tree.rollout_policy(game)
             game.apply_move(move)

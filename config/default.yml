@@ -6,8 +6,8 @@ game:
 
 # Game specific parameters
   # Nim-specific parameters, only used when type: "Nim"
-  stones: 30     # N (MAX 255 because of state key conversion, may be upped by changing Nim.get_state())
-  max_move: 7     # K
+  stones: 15     # N (MAX 255 because of state key conversion, may be upped by changing Nim.get_state())
+  max_move: 13     # K
 
   # Ledge-specific parameters, only used when type: "Ledge"
   # [<list> | <length, copper_coins>] a specific initial board, or a randomly initialized one
@@ -18,9 +18,9 @@ game:
     - 1
     - 0
     - 2
-#    length: 10
-#    copper_coins: 1
+#    length: 6
+#    copper_coins: 2
 
 mcts:
-  simulations: 300  # M
+  simulations: 500  # M
   games: 100        # G

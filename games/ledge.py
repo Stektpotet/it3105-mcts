@@ -3,13 +3,12 @@ from typing import List
 
 import numpy as np
 
-from game import Game, State
+from game import Game
 
 
 # rules: a player may
 # a. pick up the coin currently sitting on the ledge
 # b. move a coin from its current location to another location to the left
-
 
 class Ledge(Game):
 
