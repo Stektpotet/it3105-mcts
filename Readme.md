@@ -26,7 +26,7 @@ The config yaml-file controls all the hyper-parameters, there are 2 groups:
 `game` - controls the game mcts will be applied on
 ​	Within you'll find:
 ​		`type: <"Nim"|"Ledge">` - the game to play - if badly specified, defaults to "Nim"
-​		`player_starting: <1|2|3>` - the player that starts, 3 causes random selection for each game of the batch
+​		`player_start_mode: <1|2|3>` - the player that starts, 3 causes random selection for each game of the batch
 
 ​	If `type` is `"Nim"`:
 ​		`stones: <integer>` - the number of stones/pieces to be played with

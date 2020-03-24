@@ -1,13 +1,13 @@
 game:
   # ["Nim"|"Ledge"]: Game to play
-  type: "Nim"
+  type: "Ledge"
   # [1|2|3]: Starting player, 3 -> starting player randomly assigned.
-  player_starting: 2 # P
+  player_start_mode: 3 # P
 
 # Game specific parameters
   # Nim-specific parameters, only used when type: "Nim"
-  stones: 20     # N
-  max_move: 5     # K
+  stones: 30     # N (MAX 255 because of state key conversion, may be upped by changing Nim.get_state())
+  max_move: 7     # K
 
   # Ledge-specific parameters, only used when type: "Ledge"
   # [<list> | <length, copper_coins>] a specific initial board, or a randomly initialized one
@@ -23,4 +23,4 @@ game:
 
 mcts:
   simulations: 300  # M
-  games: 20        # G
+  games: 100        # G

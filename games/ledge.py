@@ -13,10 +13,18 @@ from game import Game, State
 
 class Ledge(Game):
 
-    def __init__(self, player_starting: int, initial_board=None):
-        Game.__init__(self, player_starting)
+    def clone(self):
+        clone = Ledge(self.player_start_mode, self.board)
+        clone._player1_starts = self._player1_starts
+        clone._player1s_turn = self._player1s_turn
+        return clone
 
-        if type(initial_board) is list:
+    def __init__(self, player_start_mode: int, initial_board=None):
+        Game.__init__(self, player_start_mode)
+
+        if type(initial_board) is np.ndarray:
+            self.board = np.copy(initial_board)
+        elif type(initial_board) is list:
             self.board = np.array(initial_board)
             if len(np.where(self.board > 1)[0]) > 1:
                 print(f"Bad initial configuration, too many gold! - Overriding board definition: [1, 0, 0, 2]")

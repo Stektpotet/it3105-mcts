@@ -21,18 +21,23 @@ from game import Game, State
 # THE SYSTEM SHOULD BE ABLE TO PLAY WITH ANY VALUE FOR N & K, WHERE 1 < K < N < 100
 
 
-
 class Nim(Game):
 
-    def __init__(self, player_starting: int, stones: int, max_move: int, min_move: int = 1):
-        Game.__init__(self, player_starting)
+    def clone(self):
+        clone = Nim(self.player_start_mode, self._stones, self._max_move, self._min)
+        clone._player1_starts = self._player1_starts
+        clone._player1s_turn = self._player1s_turn
+        return clone
+
+    def __init__(self, player_start_mode: int, stones: int, max_move: int, min_move: int = 1):
+        Game.__init__(self, player_start_mode)
         self._initial_stone_count = stones
         if stones < 1:
             print(f"Too few, or negative amount of stones, clamping to 1!")
             stones = 1
         self._stones = np.int32(stones)
-        self._max = max_move
-        self._min = min_move
+        self._max = np.int32(max_move)
+        self._min = np.int32(min_move)
         self._starting_allowed_moves = list(np.arange(1, self._max_move + 1))
         self._last_state = self._stones
 
@@ -55,7 +60,7 @@ class Nim(Game):
     #     return self._stones
 
     @property
-    def _max_move(self):
+    def _max_move(self) -> np.int32:
         """
         :return: the maximum number of stones that can currently
         be taken given the number of remaining stones
@@ -65,7 +70,7 @@ class Nim(Game):
     # ================= METHODS =================
 
     def get_state(self) -> (bool, bytes):
-        return self.player1s_turn, self._stones.item().to_bytes(4, byteorder="big")
+        return self.player1s_turn, self._stones.item().to_bytes(1, byteorder="big")
 
     def allowed_moves(self) -> List:
         """

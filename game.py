@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from random import random
+import random
 from typing import List
 
 import numpy as np
@@ -29,6 +29,9 @@ class State:
 
 class Game(ABC):
 
+    _player1s_turn: bool
+    _player1_starts: bool
+
     @staticmethod
     def from_config(game_class, config):
         arg_count = game_class.__init__.__code__.co_argcount
@@ -57,7 +60,7 @@ class Game(ABC):
         return self._player1s_turn
 
     @property
-    def player1s_starts(self):
+    def player1_starts(self):
         return self._player1_starts
 
     @property
@@ -67,9 +70,21 @@ class Game(ABC):
 
     # ================= METHODS =================
 
+    def start(self):
+        if 1 <= self.player_start_mode <= 2:
+            self._player1s_turn = (self.player_start_mode == 1)
+        else:
+            self._player1s_turn = bool(random.getrandbits(1))
+        self._player1_starts = self._player1s_turn
+
     @abstractmethod
     def get_state(self) -> (bool, bytes):
         pass
+
+    @abstractmethod
+    def clone(self):
+        pass
+
 
     @abstractmethod
     def allowed_moves(self) -> List:
@@ -92,13 +107,8 @@ class Game(ABC):
     def _swap_player(self) -> None:
         self._player1s_turn = not self._player1s_turn
 
-    def __init__(self, player_starting: int):
-        # TODO: this must be moved out of here, as 3 should assign randomly for each game in a batch
-        if player_starting < 1 or player_starting > 2:
-            self._player1s_turn = bool(random.getrandbits(1))
-        else:
-            self._player1s_turn = (player_starting == 1)
-        self._player1_starts = self._player1s_turn
+    def __init__(self, player_start_mode: int):
+        self.player_start_mode = player_start_mode
 
     def starting_player_won(self):
         if not self.completed:
