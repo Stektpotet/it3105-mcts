@@ -1,4 +1,4 @@
-## Peg Solitaire RL
+## Monte Carlo Tree Search
 
 Run by:
 `python main.py`
